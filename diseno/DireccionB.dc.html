@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: oklch(0.25 0.02 260);
+    }
+    a { color: #4f46e5; text-decoration: none; }
+    a:hover { color: #4338ca; text-decoration: underline; }
+    input::placeholder { color: #94a3b8; }
+  </style>
+</helmet>
+
+<div style="display: flex; flex-direction: column; width: 100%; height: 900px; background: oklch(0.98 0.005 260);">
+
+  <!-- Barra institucional: la misma que usa el dashboard tras entrar -->
+  <header style="background: #ffffff; border-bottom: 1px solid #e2e8f0; padding: 14px 40px; display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
+    <div style="width: 32px; height: 32px; border-radius: 8px; background: #4f46e5; display: grid; place-items: center; color: #ffffff; font-size: 13px; font-weight: 700;">SA</div>
+    <div style="line-height: 1.25;">
+      <div style="font-size: 14px; font-weight: 600; color: #0f172a;">Seguimiento Académico</div>
+      <div style="font-size: 12px; color: #64748b;">Alertas tempranas</div>
+    </div>
+    <div style="margin-left: auto; font-size: 13px; color: #64748b;">
+      Institución Universitaria Digital de Antioquia
+    </div>
+  </header>
+
+  <!-- Cuerpo: formulario de sistema, etiqueta a la izquierda y campo a lo ancho -->
+  <main style="flex-grow: 1; padding: 72px 40px; display: flex; flex-direction: column;">
+
+    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 24px;">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -0.01em; color: #0f172a;">
+        Acceso al sistema
+      </h1>
+      <p style="margin: 6px 0 0; font-size: 14px; color: #64748b;">
+        Use su cuenta institucional. El sistema determina su panel según el rol asignado.
+      </p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 0;">
+
+      <div style="display: grid; grid-template-columns: 260px 1fr; gap: 32px; align-items: center; padding: 26px 0; border-bottom: 1px solid #e2e8f0;">
+        <label style="font-size: 14px; font-weight: 600; color: #334155;">
+          Correo electrónico
+          <span style="display: block; font-weight: 400; font-size: 13px; color: #94a3b8; margin-top: 3px;">Dominio institucional</span>
+        </label>
+        <input type="email" placeholder="nombre@dashboard.edu.co"
+          style="width: 100%; box-sizing: border-box; height: 44px; padding: 0 14px; font-size: 15px; font-family: inherit; color: #0f172a; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 260px 1fr; gap: 32px; align-items: center; padding: 26px 0; border-bottom: 1px solid #e2e8f0;">
+        <label style="font-size: 14px; font-weight: 600; color: #334155;">
+          Contraseña
+          <span style="display: block; font-weight: 400; font-size: 13px; color: #94a3b8; margin-top: 3px;">Mínimo 8 caracteres</span>
+        </label>
+        <input type="password" value="············"
+          style="width: 100%; box-sizing: border-box; height: 44px; padding: 0 14px; font-size: 15px; font-family: inherit; color: #0f172a; background: #ffffff; border: 1px solid #4f46e5; border-radius: 6px; outline: none; box-shadow: 0 0 0 3px rgba(79,70,229,0.14);">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 260px 1fr; gap: 32px; align-items: center; padding: 26px 0;">
+        <div></div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+          <button type="button"
+            style="height: 44px; padding: 0 32px; font-size: 15px; font-weight: 600; font-family: inherit; color: #ffffff; background: #4f46e5; border: none; border-radius: 6px; cursor: pointer;">
+            Ingresar
+          </button>
+          <a href="#" style="font-size: 14px;">¿Olvidó su contraseña?</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bloque de estado del servicio: informacion real del sistema, no relleno -->
+    <div style="margin-top: auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px;">
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 20px;">
+        <div style="display: flex; align-items: center; gap: 9px;">
+          <span style="width: 8px; height: 8px; border-radius: 999px; background: oklch(0.72 0.15 155);"></span>
+          <span style="font-size: 13px; font-weight: 600; color: #334155;">Servicio operativo</span>
+        </div>
+        <p style="margin: 8px 0 0; font-size: 13px; color: #64748b;">Sincronización académica al día.</p>
+      </div>
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 20px;">
+        <div style="font-size: 13px; font-weight: 600; color: #334155;">Periodo activo</div>
+        <p style="margin: 8px 0 0; font-size: 13px; color: #64748b;">2026-2</p>
+      </div>
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 20px;">
+        <div style="font-size: 13px; font-weight: 600; color: #334155;">Soporte</div>
+        <p style="margin: 8px 0 0; font-size: 13px; color: #64748b;">
+          <a href="#">soporte.academico@iudigital.edu.co</a>
+        </p>
+      </div>
+    </div>
+
+  </main>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

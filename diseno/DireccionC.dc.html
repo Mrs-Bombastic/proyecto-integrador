@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: oklch(0.25 0.02 260);
+    }
+    a { color: #4f46e5; text-decoration: none; }
+    a:hover { color: #4338ca; text-decoration: underline; }
+    input::placeholder { color: #cbd5e1; }
+  </style>
+</helmet>
+
+<div style="display: flex; flex-direction: column; width: 100%; height: 900px; background: #ffffff;">
+
+  <!-- Franja de acento: los tres estados del semaforo en bloques planos -->
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); height: 5px; flex-shrink: 0;">
+    <span style="background: oklch(0.72 0.15 155);"></span>
+    <span style="background: oklch(0.78 0.15 85);"></span>
+    <span style="background: oklch(0.63 0.2 25);"></span>
+  </div>
+
+  <div style="flex-grow: 1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px; padding: 56px 64px 48px;">
+
+    <!-- Titular editorial -->
+    <div style="grid-column: span 6; display: flex; flex-direction: column;">
+      <div style="display: flex; align-items: center; gap: 11px;">
+        <div style="width: 30px; height: 30px; border-radius: 7px; background: #4f46e5; display: grid; place-items: center; color: #ffffff; font-size: 12px; font-weight: 700;">SA</div>
+        <span style="font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #64748b;">
+          IU Digital de Antioquia
+        </span>
+      </div>
+
+      <h1 style="margin: auto 0 0; font-size: 62px; line-height: 1.04; font-weight: 600; letter-spacing: -0.035em; color: #0f172a; text-wrap: pretty;">
+        Ver a tiempo<br>
+        a quien necesita<br>
+        acompañamiento.
+      </h1>
+
+      <p style="margin: 28px 0 auto; font-size: 17px; line-height: 1.65; color: #475569; max-inline-size: 44ch;">
+        El dashboard reúne calificaciones, asistencia y participación de los
+        programas virtuales, y avisa antes de que el rezago sea irreversible.
+      </p>
+
+      <div style="display: flex; gap: 40px; border-top: 1px solid #e2e8f0; padding-top: 24px;">
+        <div>
+          <div style="font-size: 30px; font-weight: 600; letter-spacing: -0.02em; color: #0f172a;">4</div>
+          <div style="font-size: 13px; color: #64748b; margin-top: 2px;">indicadores por estudiante</div>
+        </div>
+        <div>
+          <div style="font-size: 30px; font-weight: 600; letter-spacing: -0.02em; color: #0f172a;">3</div>
+          <div style="font-size: 13px; color: #64748b; margin-top: 2px;">niveles de riesgo</div>
+        </div>
+        <div>
+          <div style="font-size: 30px; font-weight: 600; letter-spacing: -0.02em; color: #0f172a;">4</div>
+          <div style="font-size: 13px; color: #64748b; margin-top: 2px;">roles de acceso</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario sin caja: campos de linea -->
+    <div style="grid-column: 8 / span 5; display: flex; flex-direction: column; justify-content: center;">
+
+      <h2 style="margin: 0 0 4px; font-size: 15px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #94a3b8;">
+        Iniciar sesión
+      </h2>
+
+      <div style="margin-top: 40px; display: flex; flex-direction: column; gap: 34px;">
+        <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 10px;">
+            Correo electrónico
+          </label>
+          <input type="email" placeholder="nombre@dashboard.edu.co"
+            style="width: 100%; box-sizing: border-box; height: 44px; padding: 0 2px; font-size: 17px; font-family: inherit; color: #0f172a; background: transparent; border: none; border-bottom: 1px solid #cbd5e1; border-radius: 0; outline: none;">
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 10px;">
+            Contraseña
+          </label>
+          <input type="password" value="············"
+            style="width: 100%; box-sizing: border-box; height: 44px; padding: 0 2px; font-size: 17px; font-family: inherit; color: #0f172a; background: transparent; border: none; border-bottom: 2px solid #4f46e5; border-radius: 0; outline: none;">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 24px; margin-top: 6px;">
+          <button type="button"
+            style="height: 48px; padding: 0 40px; font-size: 15px; font-weight: 600; font-family: inherit; color: #ffffff; background: #0f172a; border: none; border-radius: 4px; cursor: pointer;">
+            Ingresar
+          </button>
+          <a href="#" style="font-size: 14px; color: #64748b;">¿Olvidó su contraseña?</a>
+        </div>
+      </div>
+
+      <p style="margin: 56px 0 0; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 13px; line-height: 1.6; color: #64748b;">
+        Estudiantes, docentes, coordinadores y administradores acceden con la misma
+        cuenta; el panel se ajusta al rol.
+      </p>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

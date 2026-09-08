@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: oklch(0.25 0.02 260);
+    }
+    a { color: #4f46e5; text-decoration: none; }
+    a:hover { color: #4338ca; text-decoration: underline; }
+    input::placeholder { color: #94a3b8; }
+  </style>
+</helmet>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; width: 100%; height: 900px;">
+
+  <!-- Panel institucional -->
+  <div style="background: oklch(0.5 0.16 260); padding: 64px; display: flex; flex-direction: column; justify-content: space-between; color: #ffffff;">
+
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.16); display: grid; place-items: center; font-size: 14px; font-weight: 700; letter-spacing: 0.02em;">SA</div>
+      <div style="font-size: 14px; font-weight: 600; line-height: 1.3;">
+        Institución Universitaria<br>Digital de Antioquia
+      </div>
+    </div>
+
+    <div>
+      <h1 style="margin: 0; font-size: 44px; line-height: 1.12; font-weight: 600; letter-spacing: -0.02em; text-wrap: pretty;">
+        Seguimiento académico<br>y alertas tempranas
+      </h1>
+      <p style="margin: 20px 0 0; font-size: 16px; line-height: 1.6; color: rgba(255,255,255,0.78); max-inline-size: 46ch;">
+        Calificaciones, asistencia y participación en un solo lugar, con detección
+        temprana de los estudiantes que necesitan acompañamiento.
+      </p>
+
+      <div style="margin-top: 48px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: baseline; gap: 14px;">
+          <span style="width: 10px; height: 10px; border-radius: 999px; background: oklch(0.72 0.15 155); flex-shrink: 0;"></span>
+          <div style="font-size: 14px; line-height: 1.5;">
+            <span style="font-weight: 600;">Normal</span>
+            <span style="color: rgba(255,255,255,0.7);"> · desempeño dentro de lo esperado</span>
+          </div>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 14px;">
+          <span style="width: 10px; height: 10px; border-radius: 999px; background: oklch(0.78 0.15 85); flex-shrink: 0;"></span>
+          <div style="font-size: 14px; line-height: 1.5;">
+            <span style="font-weight: 600;">Riesgo medio</span>
+            <span style="color: rgba(255,255,255,0.7);"> · señales que conviene revisar</span>
+          </div>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 14px;">
+          <span style="width: 10px; height: 10px; border-radius: 999px; background: oklch(0.63 0.2 25); flex-shrink: 0;"></span>
+          <div style="font-size: 14px; line-height: 1.5;">
+            <span style="font-weight: 600;">Riesgo alto</span>
+            <span style="color: rgba(255,255,255,0.7);"> · requiere intervención inmediata</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.6);">
+      Proyecto Integrado I · Facultad de Ingeniería
+    </p>
+  </div>
+
+  <!-- Formulario -->
+  <div style="background: #ffffff; padding: 64px 88px; display: flex; flex-direction: column; justify-content: center;">
+
+    <h2 style="margin: 0; font-size: 26px; font-weight: 600; letter-spacing: -0.01em; color: #0f172a;">
+      Iniciar sesión
+    </h2>
+    <p style="margin: 8px 0 40px; font-size: 15px; color: #64748b;">
+      Acceda con su cuenta institucional.
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 22px;">
+      <div>
+        <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 7px;">
+          Correo electrónico
+        </label>
+        <input type="email" placeholder="nombre@dashboard.edu.co"
+          style="width: 100%; box-sizing: border-box; height: 46px; padding: 0 14px; font-size: 15px; font-family: inherit; color: #0f172a; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; outline: none;">
+      </div>
+
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px;">
+          <label style="font-size: 13px; font-weight: 600; color: #334155;">Contraseña</label>
+          <a href="#" style="font-size: 13px;">¿Olvidó su contraseña?</a>
+        </div>
+        <input type="password" value="············"
+          style="width: 100%; box-sizing: border-box; height: 46px; padding: 0 14px; font-size: 15px; font-family: inherit; color: #0f172a; background: #ffffff; border: 1px solid #4f46e5; border-radius: 6px; outline: none; box-shadow: 0 0 0 3px rgba(79,70,229,0.14);">
+      </div>
+
+      <button type="button"
+        style="width: 100%; height: 46px; margin-top: 6px; font-size: 15px; font-weight: 600; font-family: inherit; color: #ffffff; background: #4f46e5; border: none; border-radius: 6px; cursor: pointer;">
+        Ingresar
+      </button>
+    </div>
+
+    <div style="margin-top: 40px; padding-top: 28px; border-top: 1px solid #e2e8f0;">
+      <p style="margin: 0 0 14px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #94a3b8;">
+        Perfiles del sistema
+      </p>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;">
+        <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 10px; font-size: 13px; color: #475569; text-align: center;">Estudiante</div>
+        <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 10px; font-size: 13px; color: #475569; text-align: center;">Docente</div>
+        <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 10px; font-size: 13px; color: #475569; text-align: center;">Coordinador</div>
+        <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px 10px; font-size: 13px; color: #475569; text-align: center;">Administrador</div>
+      </div>
+      <p style="margin: 16px 0 0; font-size: 13px; color: #64748b;">
+        ¿Problemas para ingresar? Escriba a <a href="#">soporte.academico@iudigital.edu.co</a>
+      </p>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

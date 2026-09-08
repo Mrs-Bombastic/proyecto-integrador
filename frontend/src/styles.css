@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/* --------------------------------------------------------------------------
+   Tokens del sistema visual del dashboard.
+   El esquema de semaforo (RF05 / prototipo 2) se define una sola vez aqui
+   para que los tres niveles de riesgo se vean identicos en toda la aplicacion.
+   -------------------------------------------------------------------------- */
+@theme {
+  /* Los tres estados del semáforo. Coinciden con emerald-500, amber-500 y
+     red-500, que son los tonos que ya usan las tablas y los distintivos: el
+     token nombra el color institucional en vez de duplicar otro parecido. */
+  --color-riesgo-normal: oklch(69.6% 0.17 162.48);
+  --color-riesgo-medio: oklch(76.9% 0.188 70.08);
+  --color-riesgo-alto: oklch(63.7% 0.237 25.331);
+
+  /* Color de marca para SUPERFICIES grandes (el panel del acceso). Es un
+     índigo menos saturado que indigo-600: el tono de los botones, llevado a
+     media pantalla, resulta eléctrico y poco institucional. Los controles
+     siguen usando indigo-600, que es su papel: acción, no fondo. */
+  --color-marca: oklch(0.5 0.16 260);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background-color: oklch(0.98 0.005 260);
+  color: oklch(0.25 0.02 260);
+}

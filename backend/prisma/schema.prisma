@@ -1,0 +1,432 @@
+// ---------------------------------------------------------------------------
+// Dashboard de Seguimiento Academico y Alertas Tempranas
+// Modelo de datos - traduccion directa del Modelo Entidad-Relacion del proyecto
+// ---------------------------------------------------------------------------
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma 7: la cadena de conexion vive en prisma.config.ts (migraciones) y en
+// el adaptador de driver que recibe PrismaClient (runtime), no en este archivo.
+datasource db {
+  provider = "postgresql"
+}
+
+// --------------------------- Enumeraciones ---------------------------------
+
+enum EstadoEstudiante {
+  ACTIVO
+  RETIRADO
+  GRADUADO
+}
+
+enum EstadoAsistencia {
+  PRESENTE
+  AUSENTE
+  JUSTIFICADO
+  TARDE
+}
+
+enum TipoParticipacion {
+  FORO
+  MENSAJE
+  RECURSO
+  ACTIVIDAD
+}
+
+enum EstadoEntrega {
+  PENDIENTE
+  ENTREGADA
+  ENTREGADA_TARDE
+  VENCIDA
+}
+
+enum NivelRiesgo {
+  NORMAL
+  MEDIO
+  ALTO
+}
+
+enum TipoAlerta {
+  PROMEDIO
+  ASISTENCIA
+  PARTICIPACION
+  ENTREGAS
+  GLOBAL
+}
+
+enum EstadoAlerta {
+  NUEVA
+  EN_PROCESO
+  GESTIONADA
+  DESCARTADA
+}
+
+enum CanalNotificacion {
+  PLATAFORMA
+  CORREO
+}
+
+// ------------------------- Usuarios y acceso -------------------------------
+
+/// RF01 - roles diferenciados. Se mantiene como tabla (no enum) para respetar
+/// la relacion Usuario-Rol documentada en el MER y permitir permisos por rol.
+model Rol {
+  id          Int       @id @default(autoincrement())
+  nombre      String    @unique // ESTUDIANTE | DOCENTE | COORDINADOR | ADMINISTRADOR
+  descripcion String?
+  permisos    String[]  @default([])
+  usuarios    Usuario[]
+
+  @@map("rol")
+}
+
+model Usuario {
+  id               String    @id @default(uuid())
+  nombres          String
+  apellidos        String
+  email            String    @unique
+  passwordHash     String
+  activo           Boolean   @default(true)
+  ultimoAcceso     DateTime?
+  intentosFallidos Int       @default(0)
+  bloqueadoHasta   DateTime?
+  creadoEn         DateTime  @default(now())
+  actualizadoEn    DateTime  @updatedAt
+
+  rolId Int
+  rol   Rol @relation(fields: [rolId], references: [id])
+
+  estudiante           Estudiante?
+  docente              Docente?
+  programasACargo      Programa[]            @relation("CoordinadorPrograma")
+  alertasGestionadas   Alerta[]              @relation("AlertaGestionadaPor")
+  seguimientos         Seguimiento[]
+  notificaciones       Notificacion[]
+  umbralesActualizados ConfiguracionUmbral[]
+  auditorias           Auditoria[]
+
+  @@index([rolId])
+  @@map("usuario")
+}
+
+// ------------------------- Estructura academica ----------------------------
+
+model Programa {
+  id        String  @id @default(uuid())
+  codigo    String  @unique
+  nombre    String
+  facultad  String
+  modalidad String  @default("VIRTUAL")
+  activo    Boolean @default(true)
+
+  coordinadorId String?
+  coordinador   Usuario? @relation("CoordinadorPrograma", fields: [coordinadorId], references: [id])
+
+  cursos      Curso[]
+  estudiantes Estudiante[]
+
+  @@map("programa")
+}
+
+model Curso {
+  id       String @id @default(uuid())
+  codigo   String @unique
+  nombre   String
+  creditos Int    @default(3)
+  periodo  String // ej. "2026-2"
+
+  programaId String
+  programa   Programa @relation(fields: [programaId], references: [id])
+
+  docenteId String?
+  docente   Docente? @relation(fields: [docenteId], references: [id])
+
+  inscripciones Inscripcion[]
+  alertas       Alerta[]
+  observaciones Observacion[]
+
+  @@index([programaId])
+  @@index([docenteId])
+  @@map("curso")
+}
+
+model Estudiante {
+  id               String           @id @default(uuid())
+  codigoEstudiante String           @unique
+  semestre         Int              @default(1)
+  fechaIngreso     DateTime         @default(now())
+  estado           EstadoEstudiante @default(ACTIVO)
+
+  /// Periodo en que el estudiante ingresó al programa, ej. "2024-1". Es el
+  /// criterio de agrupación por cohorte que exige el RF08: permite comparar
+  /// generaciones completas, no solo cursos.
+  cohorte String @default("2026-1")
+
+  usuarioId String  @unique
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  programaId String
+  programa   Programa @relation(fields: [programaId], references: [id])
+
+  inscripciones Inscripcion[]
+  alertas       Alerta[]
+  observaciones Observacion[]
+  indicadores   IndicadorEstudiante[]
+
+  @@index([programaId])
+  @@index([cohorte])
+  @@map("estudiante")
+}
+
+model Docente {
+  id            String  @id @default(uuid())
+  codigoDocente String  @unique
+  departamento  String?
+
+  usuarioId String  @unique
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  cursos        Curso[]
+  observaciones Observacion[]
+
+  @@map("docente")
+}
+
+/// Tabla intermedia de la relacion muchos-a-muchos Estudiante <-> Curso.
+model Inscripcion {
+  id               String   @id @default(uuid())
+  fechaInscripcion DateTime @default(now())
+
+  estudianteId String
+  estudiante   Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+
+  cursoId String
+  curso   Curso  @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+
+  calificaciones  Calificacion[]
+  asistencias     Asistencia[]
+  participaciones Participacion[]
+  entregas        Entrega[]
+
+  @@unique([estudianteId, cursoId])
+  @@index([cursoId])
+  @@map("inscripcion")
+}
+
+// --------------------------- Indicadores base ------------------------------
+
+/// RF02 - calificaciones por curso, corte y periodo.
+model Calificacion {
+  id            String   @id @default(uuid())
+  corte         Int // 1, 2, 3
+  nota          Decimal  @db.Decimal(3, 2) // escala 0.00 - 5.00
+  porcentaje    Int      @default(100) // peso del corte
+  descripcion   String?
+  fechaRegistro DateTime @default(now())
+
+  inscripcionId String
+  inscripcion   Inscripcion @relation(fields: [inscripcionId], references: [id], onDelete: Cascade)
+
+  @@index([inscripcionId])
+  @@map("calificacion")
+}
+
+/// RF03 - asistencia a sesiones sincronicas.
+model Asistencia {
+  id               String           @id @default(uuid())
+  fechaSesion      DateTime
+  estado           EstadoAsistencia @default(PRESENTE)
+  minutosConectado Int              @default(0)
+
+  inscripcionId String
+  inscripcion   Inscripcion @relation(fields: [inscripcionId], references: [id], onDelete: Cascade)
+
+  @@index([inscripcionId])
+  @@map("asistencia")
+}
+
+/// RF04 - participacion en foros y actividades del LMS.
+model Participacion {
+  id       String            @id @default(uuid())
+  fecha    DateTime          @default(now())
+  tipo     TipoParticipacion @default(FORO)
+  cantidad Int               @default(1)
+  detalle  String?
+
+  inscripcionId String
+  inscripcion   Inscripcion @relation(fields: [inscripcionId], references: [id], onDelete: Cascade)
+
+  @@index([inscripcionId])
+  @@map("participacion")
+}
+
+/// Soporta el indicador "entregas vencidas" de la matriz de riesgo.
+model Entrega {
+  id           String        @id @default(uuid())
+  titulo       String
+  fechaLimite  DateTime
+  fechaEntrega DateTime?
+  estado       EstadoEntrega @default(PENDIENTE)
+
+  inscripcionId String
+  inscripcion   Inscripcion @relation(fields: [inscripcionId], references: [id], onDelete: Cascade)
+
+  @@index([inscripcionId])
+  @@map("entrega")
+}
+
+// ----------------------- Motor de riesgo y alertas -------------------------
+
+/// Umbrales configurables por el administrador (RF05 / caso de uso 5).
+/// Un registro por indicador; el motor de riesgo los lee en cada calculo.
+model ConfiguracionUmbral {
+  id          Int    @id @default(autoincrement())
+  indicador   String @unique // PROMEDIO | ASISTENCIA | PARTICIPACION | ENTREGAS
+  descripcion String
+
+  /// Valor a partir del cual el indicador se considera en verde.
+  umbralVerde Decimal @db.Decimal(6, 2)
+
+  /// Valor a partir del cual se considera amarillo; por debajo es rojo.
+  umbralAmarillo Decimal @db.Decimal(6, 2)
+
+  /// true cuando valores MAYORES son mejores (promedio, asistencia);
+  /// false cuando valores MENORES son mejores (entregas vencidas).
+  mayorEsMejor Boolean @default(true)
+
+  /// Peso del indicador en el puntaje global de riesgo (0 - 1).
+  peso   Decimal @db.Decimal(3, 2)
+  activo Boolean @default(true)
+
+  actualizadoPorId String?
+  actualizadoPor   Usuario? @relation(fields: [actualizadoPorId], references: [id])
+  actualizadoEn    DateTime @updatedAt
+
+  @@map("configuracion_umbral")
+}
+
+/// Snapshot calculado por el motor de riesgo. Permite responder el dashboard
+/// sin recalcular en cada peticion (RNF02) y conservar la evolucion (RF12).
+model IndicadorEstudiante {
+  id                   String      @id @default(uuid())
+  periodo              String
+  promedio             Decimal     @db.Decimal(3, 2)
+  porcentajeAsistencia Decimal     @db.Decimal(5, 2)
+  participacionSemanal Decimal     @db.Decimal(5, 2)
+  entregasVencidas     Int         @default(0)
+  puntajeRiesgo        Decimal     @db.Decimal(5, 2)
+  nivelRiesgo          NivelRiesgo @default(NORMAL)
+  calculadoEn          DateTime    @default(now())
+
+  estudianteId String
+  estudiante   Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+
+  @@index([estudianteId, calculadoEn])
+  @@index([nivelRiesgo])
+  @@map("indicador_estudiante")
+}
+
+/// RF05 / RF09 - alerta generada al superarse un umbral.
+model Alerta {
+  id              String       @id @default(uuid())
+  tipoAlerta      TipoAlerta
+  nivelRiesgo     NivelRiesgo
+  puntajeRiesgo   Decimal      @db.Decimal(5, 2)
+  valorObservado  Decimal      @db.Decimal(6, 2)
+  umbralSuperado  Decimal      @db.Decimal(6, 2)
+  mensaje         String
+  estado          EstadoAlerta @default(NUEVA)
+  fechaGeneracion DateTime     @default(now())
+  fechaGestion    DateTime?
+
+  estudianteId String
+  estudiante   Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+
+  cursoId String?
+  curso   Curso?  @relation(fields: [cursoId], references: [id])
+
+  gestionadaPorId String?
+  gestionadaPor   Usuario? @relation("AlertaGestionadaPor", fields: [gestionadaPorId], references: [id])
+
+  seguimientos   Seguimiento[]
+  notificaciones Notificacion[]
+
+  @@index([estudianteId])
+  @@index([estado, nivelRiesgo])
+  @@map("alerta")
+}
+
+/// Acciones registradas sobre una alerta (caso de uso 2 - trazabilidad).
+model Seguimiento {
+  id          String   @id @default(uuid())
+  accion      String // CONTACTO | TUTORIA | REMISION_BIENESTAR | CIERRE | OTRO
+  descripcion String
+  fecha       DateTime @default(now())
+
+  alertaId String
+  alerta   Alerta @relation(fields: [alertaId], references: [id], onDelete: Cascade)
+
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@index([alertaId])
+  @@map("seguimiento")
+}
+
+/// RF06 - observaciones cualitativas del docente.
+model Observacion {
+  id         String   @id @default(uuid())
+  contenido  String
+  fecha      DateTime @default(now())
+  archivoUrl String?
+
+  estudianteId String
+  estudiante   Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+
+  docenteId String
+  docente   Docente @relation(fields: [docenteId], references: [id])
+
+  cursoId String?
+  curso   Curso?  @relation(fields: [cursoId], references: [id])
+
+  @@index([estudianteId])
+  @@map("observacion")
+}
+
+/// RF09 - notificacion en plataforma y por correo.
+model Notificacion {
+  id         String            @id @default(uuid())
+  titulo     String
+  mensaje    String
+  canal      CanalNotificacion @default(PLATAFORMA)
+  leida      Boolean           @default(false)
+  fechaEnvio DateTime          @default(now())
+
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  alertaId String?
+  alerta   Alerta? @relation(fields: [alertaId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId, leida])
+  @@map("notificacion")
+}
+
+/// RNF de seguridad - registro de auditoria de acciones sensibles.
+model Auditoria {
+  id        String   @id @default(uuid())
+  accion    String
+  entidad   String
+  entidadId String?
+  detalle   String?
+  ip        String?
+  fecha     DateTime @default(now())
+
+  usuarioId String?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@index([fecha])
+  @@map("auditoria")
+}

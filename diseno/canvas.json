@@ -1,0 +1,59 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "title": "A · Panel institucional",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "DireccionB.dc.html",
+      "title": "B · Consola administrativa",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "DireccionC.dc.html",
+      "title": "C · Editorial tipográfica",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": 0,
+      "y": -180,
+      "w": 520,
+      "text": "Login del Dashboard de Seguimiento Académico.\n\nRestricciones: sin degradados, sin contenedor de ancho máximo.\nTodo hereda los tokens de la app: índigo oklch(0.5 0.16 260), semáforo verde/ámbar/rojo, Segoe UI.\n\nElija una dirección y la implemento en Angular."
+    },
+    {
+      "id": "nota-a",
+      "x": 0,
+      "y": 950,
+      "w": 440,
+      "text": "A · Panel institucional\n\nDos mitades a ancho completo. La izquierda explica de qué va el sistema y enseña el semáforo antes de entrar; la derecha es el formulario.\n\nA favor: la más reconocible, da identidad sin decorar.\nEn contra: la mitad izquierda es espacio que no trabaja para quien ya entra a diario."
+    },
+    {
+      "id": "nota-b",
+      "x": 1560,
+      "y": 950,
+      "w": 440,
+      "text": "B · Consola administrativa\n\nMisma barra superior que el dashboard. Formulario de sistema: etiqueta a la izquierda, campo ocupando el resto del ancho.\n\nA favor: continuidad total con la app; el login no parece otra aplicación.\nEn contra: sobria hasta lo anodino; no comunica nada del producto."
+    },
+    {
+      "id": "nota-c",
+      "x": 3120,
+      "y": 950,
+      "w": 440,
+      "text": "C · Editorial tipográfica\n\nRejilla de 12 columnas, titular grande y campos de línea sin caja. La franja superior son los tres estados del semáforo en bloques planos.\n\nA favor: la más memorable y la que mejor usa el ancho completo.\nEn contra: se aleja del resto de la app; habría que llevar ese aire a las demás pantallas para que no desentone."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

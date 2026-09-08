@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+*.log
+coverage/
+.angular/
+.DS_Store
+.vscode
+# Archivos temporales de verificacion
+*.tmp
+*.tsbuildinfo

@@ -11,3 +11,4 @@ coverage/
 # Archivos temporales de verificacion
 *.tmp
 *.tsbuildinfo
+.env.production

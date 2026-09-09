@@ -8,5 +8,5 @@
  */
 export const environment = {
   produccion: true,
-  api: 'https://REEMPLAZAR-CON-TU-DOMINIO.up.railway.app/api',
+  api: 'https://proyecto-integrador-production-90fb.up.railway.app/api',
 };

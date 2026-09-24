@@ -80,9 +80,20 @@ En cada ejecución del motor, por estudiante:
 3. Si el nivel resultante es NORMAL y existían alertas abiertas de tipo GLOBAL,
    se cierran automáticamente con estado `GESTIONADA` y un seguimiento de
    sistema que registra la recuperación.
-4. Cada alerta creada genera una notificación en plataforma para el coordinador
-   del programa y para el docente del curso, y un correo si el canal está
-   configurado (RF09).
+4. Cada alerta creada se notifica en plataforma y por correo a las tres partes
+   que pueden actuar sobre ella (RF09):
+   - los **docentes** de los cursos en que el estudiante está inscrito —cada uno
+     recibe además el nombre de sus propios cursos con ese estudiante—, porque
+     son quienes intervienen sobre la nota y la entrega concretas;
+   - la **coordinación** del programa, que hace el seguimiento del caso;
+   - el **propio estudiante**, con un texto sin puntajes ni umbrales que le
+     indica qué indicador recuperar y le recuerda que puede pedir
+     acompañamiento. Una alerta temprana que no llega a quien debe reaccionar no
+     es temprana, es solo un registro.
+
+   Si no hay proveedor de correo configurado, el aviso queda en plataforma y el
+   mensaje completo se escribe en el log. Un recálculo despacha como máximo 60
+   correos para no agotar la cuota del proveedor gratuito.
 
 ## 5. Ciclo de vida de una alerta
 
@@ -117,3 +128,26 @@ Esta decisión resuelve la ambigüedad de roles que señaló el análisis.
 - Ejecución manual bajo demanda por el administrador o el coordinador.
 - Recálculo del estudiante afectado al registrarse una calificación,
   asistencia, participación o entrega.
+
+## 8. Relación con el retiro declarado por el estudiante (RF14)
+
+La deserción es el desenlace que la matriz de riesgo intenta evitar, así que los
+dos flujos se conectan en tres puntos:
+
+1. **El aviso al estudiante ofrece la salida documentada.** El mensaje de alerta
+   le indica que, si su situación le impide continuar, lo cuente por la opción
+   *Retiro del programa* antes de decidir. Un estudiante que abandona sin avisar
+   no deja ningún dato con el que intervenir; uno que declara el motivo, sí.
+2. **La solicitud congela el riesgo del momento.** `SolicitudDesercion` guarda
+   `nivelRiesgo` y `puntajeRiesgo` tal como estaban al radicarla. Eso permite
+   evaluar después la pregunta que valida todo el sistema: ¿el motor alcanzó a
+   alertar antes de que el estudiante desistiera, y alguien gestionó esa alerta?
+3. **Confirmar el retiro cierra las alertas abiertas.** Al pasar el estudiante a
+   `RETIRADO`, sus alertas `NUEVA` y `EN_PROCESO` pasan a `DESCARTADA`. De lo
+   contrario quedarían como casos abiertos inatendibles en el panel del
+   coordinador y seguirían disparando el escalamiento a Bienestar del RF13 sobre
+   alguien que ya no está matriculado.
+
+Los estados de la solicitud son `RADICADA` → `EN_REVISION` → `RETENIDO` o
+`CONFIRMADA`. `RETENIDO` es el resultado que persigue el sistema: el estudiante
+declaró su intención de irse, alguien intervino y se queda.

@@ -218,6 +218,49 @@ export function mensajeAlerta(
   );
 }
 
+/**
+ * Redacta el aviso que recibe el propio estudiante (RF10).
+ *
+ * Es un texto distinto al del coordinador a proposito: al estudiante no le
+ * sirve un puntaje de riesgo, le sirve saber que indicador debe recuperar y que
+ * puede pedir acompanamiento. Un aviso que suene a sancion consigue lo
+ * contrario de lo que busca un sistema de alertas tempranas.
+ */
+export function mensajeParaEstudiante(
+  nombreEstudiante: string,
+  resultado: ResultadoRiesgo,
+): string {
+  const recomendaciones: Record<Indicador, (valor: number) => string> = {
+    PROMEDIO: (v) =>
+      `tu promedio está en ${v.toFixed(2)}: conviene revisar con tus docentes las notas más bajas`,
+    ASISTENCIA: (v) =>
+      `tu asistencia está en ${v.toFixed(0)} %: recuperar las sesiones sincrónicas es lo que más rápido mejora tu situación`,
+    PARTICIPACION: (v) =>
+      `registras ${v.toFixed(1)} interacciones por semana: participar en los foros cuenta dentro de tu seguimiento`,
+    ENTREGAS: (v) =>
+      `tienes ${v.toFixed(0)} entrega(s) vencida(s): acuerda con tu docente un plazo para ponerte al día`,
+  };
+
+  const puntos = resultado.detalle
+    .filter((d) => d.semaforo !== 'VERDE')
+    .sort((a, b) => b.puntos * b.peso - a.puntos * a.peso)
+    .map((d) => `- ${recomendaciones[d.indicador](d.valor)}`);
+
+  const encabezado =
+    resultado.nivel === 'ALTO'
+      ? 'Tu seguimiento académico muestra varios indicadores en rojo.'
+      : 'Tu seguimiento académico muestra indicadores que conviene atender ahora.';
+
+  return (
+    `Hola ${nombreEstudiante.split(' ')[0]}. ${encabezado}\n\n` +
+    `${puntos.join('\n')}\n\n` +
+    'Tus docentes y la coordinación del programa ya fueron notificados para ' +
+    'acompañarte. Si tu situación personal, económica o laboral te está ' +
+    'impidiendo continuar, cuéntanoslo desde la opción "Retiro del programa" ' +
+    'de la plataforma antes de tomar una decisión definitiva.'
+  );
+}
+
 function redondear(valor: number, decimales = 2): number {
   const factor = 10 ** decimales;
   return Math.round(valor * factor) / factor;

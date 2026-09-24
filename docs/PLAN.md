@@ -35,9 +35,24 @@
    desde su panel. Son notas de acompañamiento entre docentes y coordinación,
    y exponerlas cambiaría lo que un docente se atreve a escribir. El documento
    original no lo definía; esta es la decisión adoptada.
-7. **El correo se simula si no hay SMTP configurado.** El mensaje se registra
-   en el log en lugar de fallar, para que el equipo pueda desarrollar y
-   sustentar sin credenciales de correo.
+7. **El correo se simula si no hay proveedor configurado.** El mensaje se
+   registra en el log en lugar de fallar, para que el equipo pueda desarrollar y
+   sustentar sin credenciales de correo. Para enviar de verdad el sistema
+   soporta dos proveedores gratuitos (Gmail con contraseña de aplicación y el
+   API HTTP de Brevo); se elige solo según las variables de entorno presentes.
+8. **RF09 ampliado — la alerta llega a las tres partes.** Al generarse una
+   alerta se notifica, en plataforma y por correo, a los docentes de los cursos
+   del estudiante, a la coordinación del programa y al propio estudiante. Antes
+   solo la recibía la coordinación, y una alerta temprana que no llega a quien
+   debe reaccionar deja de ser temprana. El estudiante recibe un texto distinto,
+   sin puntajes ni umbrales: le indica qué indicador recuperar.
+9. **RF14 (nuevo): retiro declarado por el estudiante.** El estudiante puede
+   radicar su retiro y explicar los motivos desde la plataforma. La solicitud
+   notifica en el acto a docentes y directivos, y **no** retira la matrícula:
+   queda abierta para que coordinación intente retenerlo, y solo el retiro
+   confirmado pasa al estudiante a `RETIRADO`. El motivo se registra sobre una
+   lista cerrada (`MotivoDesercion`) para que las cifras se puedan agregar y
+   comparar con las estadísticas institucionales de permanencia.
 
 ## 3. Cronograma corregido
 
@@ -66,11 +81,12 @@ corregida:
 | RF06 | Observaciones cualitativas | `backend/src/observaciones` + ficha del estudiante |
 | RF07 | Exportación PDF y Excel | `backend/src/reportes` (pdfmake, exceljs) |
 | RF08 | Filtros por programa/curso/cohorte/periodo | query params + catalogos de cohortes y periodos |
-| RF09 | Notificaciones correo y plataforma | `Notificacion` + `backend/src/correo` |
+| RF09 | Notificaciones correo y plataforma a docente, coordinación y estudiante | `Notificacion` + `backend/src/correo` (Gmail / Brevo / log) |
 | RF10 | Panel individual del estudiante | ruta `/mi-progreso` |
 | RF11 | Panel consolidado del coordinador | ruta `/coordinacion` |
 | RF12 | Historial de alertas y seguimientos | `IndicadorEstudiante`, `Seguimiento` |
 | RF13 | Escalamiento a Bienestar | `riesgo.service.escalarABienestar` + `correo` |
+| RF14 | Retiro declarado por el estudiante con motivos | `backend/src/desercion`, rutas `/retiro` y `/deserciones` |
 | CU · Gestionar usuarios y roles | Alta, rol, estado, contraseña y auditoría | `backend/src/usuarios`, ruta `/usuarios` |
 
 ## 5. Reparto sugerido

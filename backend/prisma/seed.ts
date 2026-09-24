@@ -11,7 +11,15 @@
  */
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient, EstadoAsistencia, EstadoEntrega, TipoParticipacion } from '@prisma/client';
+import {
+  PrismaClient,
+  EstadoAsistencia,
+  EstadoDesercion,
+  EstadoEntrega,
+  MotivoDesercion,
+  NivelRiesgo,
+  TipoParticipacion,
+} from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient({
@@ -130,6 +138,7 @@ function perfilPara(indice: number, total: number) {
 async function limpiar(): Promise<void> {
   // El orden respeta las llaves foraneas.
   await prisma.auditoria.deleteMany();
+  await prisma.solicitudDesercion.deleteMany();
   await prisma.notificacion.deleteMany();
   await prisma.seguimiento.deleteMany();
   await prisma.alerta.deleteMany();
@@ -380,6 +389,14 @@ async function main(): Promise<void> {
     }
   }
 
+  // --- Solicitudes de retiro (RF14) ---
+  // Tres casos en estados distintos para que la bandeja de retiros muestre el
+  // ciclo completo desde el primer arranque: una recien radicada que todavia se
+  // puede atender, una en acompanamiento y una que termino en retencion, que es
+  // el resultado que el sistema persigue.
+  console.log('Creando solicitudes de retiro de ejemplo...');
+  await crearSolicitudesDeRetiro();
+
   console.log('\nSemilla completada.');
   console.log(`Contrasena para todos los usuarios de prueba: ${PASSWORD_DEMO}`);
   console.log('  Administrador: admin@dashboard.edu.co');
@@ -387,6 +404,90 @@ async function main(): Promise<void> {
   console.log('  Docente:       docente1@dashboard.edu.co');
   console.log('  Estudiante:    est0001@estudiante.edu.co (perfil excelente)');
   console.log('  Estudiante:    est0195@estudiante.edu.co (perfil riesgo alto)');
+}
+
+/**
+ * Casos de ejemplo de retiro voluntario. Se eligen estudiantes del tramo de
+ * riesgo alto del generador (los ultimos codigos) porque es donde la desercion
+ * ocurre de verdad, y eso hace que el panel cuente una historia coherente con
+ * los indicadores que muestra el resto del sistema.
+ */
+async function crearSolicitudesDeRetiro(): Promise<void> {
+  const casos = [
+    {
+      codigo: 'EST0195',
+      motivo: MotivoDesercion.ECONOMICO,
+      detalle:
+        'Perdí el empleo con el que pagaba la matrícula y no alcanzo a cubrir el próximo semestre. Tampoco tengo cómo pagar el internet fijo para las sesiones.',
+      estado: EstadoDesercion.RADICADA,
+      diasAtras: 1,
+      nivelRiesgo: NivelRiesgo.ALTO,
+      puntajeRiesgo: 78.5,
+      respuesta: null,
+    },
+    {
+      codigo: 'EST0190',
+      motivo: MotivoDesercion.LABORAL,
+      detalle:
+        'Me cambiaron al turno de la tarde en el trabajo y ya no puedo conectarme a las sesiones sincrónicas de tres de mis cursos.',
+      estado: EstadoDesercion.EN_REVISION,
+      diasAtras: 6,
+      nivelRiesgo: NivelRiesgo.ALTO,
+      puntajeRiesgo: 71.0,
+      respuesta:
+        'Se contactó al estudiante. Se está evaluando el traslado a los grupos de la noche con los tres docentes.',
+    },
+    {
+      codigo: 'EST0185',
+      motivo: MotivoDesercion.FAMILIAR,
+      detalle:
+        'Tuve que asumir el cuidado de mi madre enferma y no logré sostener el ritmo de entregas durante las últimas semanas.',
+      estado: EstadoDesercion.RETENIDO,
+      diasAtras: 20,
+      nivelRiesgo: NivelRiesgo.MEDIO,
+      puntajeRiesgo: 52.0,
+      respuesta:
+        'Se acordó aplazamiento de dos cursos y plan de entregas extendido con Bienestar. El estudiante continúa en el programa.',
+    },
+  ];
+
+  for (const caso of casos) {
+    const estudiante = await prisma.estudiante.findUnique({
+      where: { codigoEstudiante: caso.codigo },
+      select: {
+        id: true,
+        programa: { select: { coordinadorId: true } },
+      },
+    });
+
+    // La semilla genera 200 estudiantes, pero si alguien reduce ese total los
+    // codigos de ejemplo pueden no existir: se omite el caso en vez de fallar.
+    if (!estudiante) continue;
+
+    const cerrada = caso.estado === EstadoDesercion.RETENIDO;
+    const fechaSolicitud = new Date(Date.now() - caso.diasAtras * 86400000);
+
+    await prisma.solicitudDesercion.create({
+      data: {
+        estudianteId: estudiante.id,
+        motivo: caso.motivo,
+        detalle: caso.detalle,
+        estado: caso.estado,
+        nivelRiesgo: caso.nivelRiesgo,
+        puntajeRiesgo: caso.puntajeRiesgo,
+        fechaSolicitud,
+        respuesta: caso.respuesta,
+        resueltaPorId: caso.respuesta ? estudiante.programa.coordinadorId : null,
+        fechaResolucion: cerrada
+          ? new Date(fechaSolicitud.getTime() + 3 * 86400000)
+          : null,
+        // Los correos de la semilla no se despachan: el aviso real solo ocurre
+        // cuando un estudiante radica la solicitud desde la aplicacion.
+        correoEnviado: false,
+        destinatarios: [],
+      },
+    });
+  }
 }
 
 main()

@@ -429,6 +429,32 @@ const COLOR_SEMAFORO: Record<string, string> = {
           }
         </div>
       }
+
+      @if (esPropio()) {
+        <!-- RF14: el retiro se ofrece aquí, junto a los indicadores que lo
+             motivan, y no escondido en un menú: si el estudiante ya decidió
+             irse, lo que importa es que la universidad se entere y alcance a
+             ofrecerle una alternativa. -->
+        <div
+          class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-5 py-4"
+        >
+          <div>
+            <p class="text-sm font-medium text-slate-800">
+              ¿Estás pensando en dejar el programa?
+            </p>
+            <p class="mt-0.5 text-sm text-slate-500">
+              Cuéntanos los motivos antes de decidir. Según el caso hay
+              aplazamiento de semestre, apoyos económicos o ajuste de carga.
+            </p>
+          </div>
+          <a
+            routerLink="/retiro"
+            class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Solicitar retiro
+          </a>
+        </div>
+      }
     }
   `,
 })

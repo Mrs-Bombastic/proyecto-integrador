@@ -46,6 +46,20 @@ export const routes: Routes = [
           import('./paginas/estudiante').then((m) => m.EstudianteComponent),
       },
       {
+        // RF14 - el estudiante declara su retiro y explica los motivos.
+        path: 'retiro',
+        canActivate: [rolGuard('ESTUDIANTE')],
+        loadComponent: () =>
+          import('./paginas/retiro').then((m) => m.RetiroComponent),
+      },
+      {
+        // RF14 - bandeja de retiros para quienes pueden intervenirlos.
+        path: 'deserciones',
+        canActivate: [rolGuard('DOCENTE', 'COORDINADOR', 'ADMINISTRADOR')],
+        loadComponent: () =>
+          import('./paginas/deserciones').then((m) => m.DesercionesComponent),
+      },
+      {
         path: 'usuarios',
         canActivate: [rolGuard('ADMINISTRADOR')],
         loadComponent: () =>

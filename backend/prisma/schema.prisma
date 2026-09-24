@@ -68,6 +68,31 @@ enum CanalNotificacion {
   CORREO
 }
 
+/// Motivos de desercion. La lista sigue la clasificacion que usan las areas de
+/// permanencia estudiantil, para que el reporte agregado sea comparable con las
+/// cifras institucionales en lugar de ser texto libre imposible de tabular.
+enum MotivoDesercion {
+  ECONOMICO
+  ACADEMICO
+  LABORAL
+  SALUD
+  FAMILIAR
+  PERSONAL
+  CAMBIO_PROGRAMA
+  OTRO
+}
+
+enum EstadoDesercion {
+  /// El estudiante la radico y ya se notifico a docentes y directivos.
+  RADICADA
+  /// Coordinacion o Bienestar esta acompanando el caso.
+  EN_REVISION
+  /// El acompanamiento tuvo efecto: el estudiante continua.
+  RETENIDO
+  /// Desercion efectiva: el estudiante queda RETIRADO.
+  CONFIRMADA
+}
+
 // ------------------------- Usuarios y acceso -------------------------------
 
 /// RF01 - roles diferenciados. Se mantiene como tabla (no enum) para respetar
@@ -106,6 +131,7 @@ model Usuario {
   notificaciones       Notificacion[]
   umbralesActualizados ConfiguracionUmbral[]
   auditorias           Auditoria[]
+  desercionesResueltas SolicitudDesercion[]  @relation("DesercionResueltaPor")
 
   @@index([rolId])
   @@map("usuario")
@@ -174,6 +200,7 @@ model Estudiante {
   alertas       Alerta[]
   observaciones Observacion[]
   indicadores   IndicadorEstudiante[]
+  deserciones   SolicitudDesercion[]
 
   @@index([programaId])
   @@index([cohorte])
@@ -393,6 +420,45 @@ model Observacion {
 
   @@index([estudianteId])
   @@map("observacion")
+}
+
+/// RF14 - el estudiante declara su intencion de desertar y explica los motivos.
+///
+/// Se guarda como solicitud y no como un simple cambio de estado del
+/// estudiante por dos razones: el motivo es el dato que permite intervenir la
+/// desercion (una causa economica se atiende distinto a una academica), y la
+/// institucion necesita la constancia de quien avisó, cuándo y a quién se
+/// notificó. El retiro efectivo solo ocurre cuando coordinacion la confirma.
+model SolicitudDesercion {
+  id      String          @id @default(uuid())
+  motivo  MotivoDesercion
+  detalle String
+
+  /// Riesgo del estudiante en el momento de radicar. Congelarlo aqui permite
+  /// analizar despues si el sistema alcanzo a alertar antes de la desercion.
+  nivelRiesgo   NivelRiesgo?
+  puntajeRiesgo Decimal?     @db.Decimal(5, 2)
+
+  estado          EstadoDesercion @default(RADICADA)
+  fechaSolicitud  DateTime        @default(now())
+  fechaResolucion DateTime?
+  /// Respuesta de coordinacion al cerrar el caso.
+  respuesta String?
+
+  /// Constancia del despacho: a quien se le notifico y si el correo salio de
+  /// verdad o quedo en el log por falta de proveedor configurado.
+  destinatarios String[] @default([])
+  correoEnviado Boolean  @default(false)
+
+  estudianteId String
+  estudiante   Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+
+  resueltaPorId String?
+  resueltaPor   Usuario? @relation("DesercionResueltaPor", fields: [resueltaPorId], references: [id])
+
+  @@index([estudianteId])
+  @@index([estado, fechaSolicitud])
+  @@map("solicitud_desercion")
 }
 
 /// RF09 - notificacion en plataforma y por correo.

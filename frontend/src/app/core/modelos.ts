@@ -248,6 +248,77 @@ export interface Notificacion {
   alerta?: { id: string; nivelRiesgo: NivelRiesgo; estado: EstadoAlerta } | null;
 }
 
+// ------------------------- Deserción (RF14) --------------------------------
+
+export type MotivoDesercion =
+  | 'ECONOMICO'
+  | 'ACADEMICO'
+  | 'LABORAL'
+  | 'SALUD'
+  | 'FAMILIAR'
+  | 'PERSONAL'
+  | 'CAMBIO_PROGRAMA'
+  | 'OTRO';
+
+export type EstadoDesercion =
+  | 'RADICADA'
+  | 'EN_REVISION'
+  | 'RETENIDO'
+  | 'CONFIRMADA';
+
+export interface SolicitudDesercion {
+  id: string;
+  motivo: MotivoDesercion;
+  detalle: string;
+  nivelRiesgo: NivelRiesgo | null;
+  puntajeRiesgo: string | null;
+  estado: EstadoDesercion;
+  fechaSolicitud: string;
+  fechaResolucion: string | null;
+  respuesta: string | null;
+  /** Correos a los que se despachó el aviso, como constancia. */
+  destinatarios: string[];
+  correoEnviado: boolean;
+  estudianteId: string;
+  estudiante?: {
+    id: string;
+    codigoEstudiante: string;
+    semestre: number;
+    cohorte: string;
+    estado: 'ACTIVO' | 'RETIRADO' | 'GRADUADO';
+    usuario: { nombres: string; apellidos: string; email: string };
+    programa: { id: string; nombre: string };
+  };
+  resueltaPor?: { nombres: string; apellidos: string } | null;
+}
+
+export interface ResumenDesercion {
+  total: number;
+  radicadas: number;
+  enRevision: number;
+  retenidos: number;
+  confirmadas: number;
+  porMotivo: { motivo: MotivoDesercion; etiqueta: string; total: number }[];
+}
+
+export const ETIQUETA_MOTIVO: Record<MotivoDesercion, string> = {
+  ECONOMICO: 'Dificultades económicas',
+  ACADEMICO: 'Dificultades académicas',
+  LABORAL: 'Incompatibilidad con el trabajo',
+  SALUD: 'Motivos de salud',
+  FAMILIAR: 'Situación familiar',
+  PERSONAL: 'Motivos personales',
+  CAMBIO_PROGRAMA: 'Cambio de programa o institución',
+  OTRO: 'Otro motivo',
+};
+
+export const ETIQUETA_ESTADO_DESERCION: Record<EstadoDesercion, string> = {
+  RADICADA: 'Radicada',
+  EN_REVISION: 'En revisión',
+  RETENIDO: 'Estudiante retenido',
+  CONFIRMADA: 'Retiro confirmado',
+};
+
 export interface Umbral {
   id: number;
   indicador: Indicador;

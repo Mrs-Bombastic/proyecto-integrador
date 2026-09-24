@@ -3,6 +3,7 @@ import {
   calcularRiesgo,
   clasificarIndicador,
   mensajeAlerta,
+  mensajeParaEstudiante,
   nivelDesdePuntaje,
   tipoAlertaPara,
   type Umbral,
@@ -242,5 +243,41 @@ describe('mensajeAlerta', () => {
     const mensaje = mensajeAlerta('Andres Jaramillo', resultado);
 
     expect(mensaje).not.toContain('Motivos');
+  });
+});
+
+describe('mensajeParaEstudiante', () => {
+  it('saluda por el nombre propio y no menciona el puntaje interno', () => {
+    const resultado = calcularRiesgo(valores({ PROMEDIO: 2.4 }), UMBRALES);
+    const mensaje = mensajeParaEstudiante('Karen Vergara', resultado);
+
+    expect(mensaje).toContain('Hola Karen');
+    // El puntaje y el nivel son vocabulario de gestion: al estudiante solo lo
+    // confunden, y el mensaje del coordinador ya los lleva.
+    expect(mensaje).not.toContain('puntaje');
+    expect(mensaje).not.toContain('riesgo');
+  });
+
+  it('da una recomendacion por cada indicador en alerta', () => {
+    const resultado = calcularRiesgo(
+      valores({ ASISTENCIA: 55, ENTREGAS: 4 }),
+      UMBRALES,
+    );
+    const mensaje = mensajeParaEstudiante('Andres Jaramillo', resultado);
+
+    expect(mensaje).toContain('tu asistencia está en 55 %');
+    expect(mensaje).toContain('4 entrega(s) vencida(s)');
+    expect(mensaje).not.toContain('tu promedio');
+  });
+
+  it('ofrece la opcion de retiro como ultimo recurso, no como primera salida', () => {
+    const resultado = calcularRiesgo(valores({ PROMEDIO: 2.0 }), UMBRALES);
+    const mensaje = mensajeParaEstudiante('Eulices Morales', resultado);
+
+    // El acompanamiento se menciona antes que el retiro: el orden importa
+    // porque es lo que el estudiante lee primero.
+    expect(mensaje.indexOf('acompañarte')).toBeLessThan(
+      mensaje.indexOf('Retiro del programa'),
+    );
   });
 });

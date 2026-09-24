@@ -7,11 +7,13 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import { CorreoService } from '../correo/correo.service.js';
+import { DestinatariosService } from '../correo/destinatarios.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { UsuarioAutenticado } from '../auth/tipos.js';
 import {
   calcularRiesgo,
   mensajeAlerta,
+  mensajeParaEstudiante,
   tipoAlertaPara,
   type Indicador,
   type ResultadoRiesgo,
@@ -24,6 +26,17 @@ const SEMANAS_VENTANA_ENTREGAS = 4;
 
 /** Dias habiles que una alerta ALTA puede permanecer sin gestion (RF13). */
 const DIAS_HABILES_ESCALAMIENTO = 5;
+
+/**
+ * Tope de correos que puede despachar un solo recalculo.
+ *
+ * El primer recalculo sobre una base recien sembrada genera alertas para
+ * decenas de estudiantes a la vez, y cada una notifica a docentes, coordinacion
+ * y estudiante. Sin este tope, una sola pulsacion del boton "Recalcular"
+ * agotaria la cuota diaria del proveedor gratuito y llenaria bandejas reales.
+ * Las notificaciones en plataforma no se limitan: esas no tienen costo.
+ */
+const LIMITE_CORREOS_POR_RECALCULO = 60;
 
 const MS_POR_DIA = 86400000;
 const MS_POR_SEMANA = 7 * MS_POR_DIA;
@@ -45,6 +58,8 @@ export interface FiltrosRiesgo {
 interface FilaAgregada {
   estudianteId: string;
   codigoEstudiante: string;
+  usuarioId: string;
+  email: string;
   nombres: string;
   apellidos: string;
   programaId: string;
@@ -70,6 +85,9 @@ interface Coordinador {
 export interface RiesgoEstudiante {
   estudianteId: string;
   codigoEstudiante: string;
+  /** Usuario y correo del estudiante, para poder notificarle (RF09). */
+  usuarioId: string;
+  email: string;
   nombre: string;
   programaId: string;
   programaNombre: string;
@@ -100,9 +118,13 @@ export interface ResumenRecalculo {
 export class RiesgoService {
   private readonly logger = new Logger(RiesgoService.name);
 
+  /** Correos que restan por despachar en el recalculo en curso. */
+  private presupuestoCorreos = LIMITE_CORREOS_POR_RECALCULO;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly correo: CorreoService,
+    private readonly destinatarios: DestinatariosService,
     private readonly config: ConfigService,
   ) {}
 
@@ -181,6 +203,8 @@ export class RiesgoService {
       SELECT
         e.id                        AS "estudianteId",
         e."codigoEstudiante"        AS "codigoEstudiante",
+        u.id                        AS "usuarioId",
+        u.email                     AS "email",
         u.nombres                   AS "nombres",
         u.apellidos                 AS "apellidos",
         e."programaId"              AS "programaId",
@@ -282,6 +306,8 @@ export class RiesgoService {
       return {
         estudianteId: fila.estudianteId,
         codigoEstudiante: fila.codigoEstudiante,
+        usuarioId: fila.usuarioId,
+        email: fila.email,
         nombre: `${fila.nombres} ${fila.apellidos}`,
         programaId: fila.programaId,
         programaNombre: fila.programaNombre,
@@ -443,6 +469,7 @@ export class RiesgoService {
    */
   async recalcularTodos(): Promise<ResumenRecalculo> {
     const inicio = Date.now();
+    this.presupuestoCorreos = LIMITE_CORREOS_POR_RECALCULO;
     const evaluaciones = await this.evaluar();
 
     const resumen: ResumenRecalculo = {
@@ -487,6 +514,7 @@ export class RiesgoService {
     solicitante: UsuarioAutenticado,
   ): Promise<RiesgoEstudiante> {
     await this.verificarAccesoAEstudiante(estudianteId, solicitante);
+    this.presupuestoCorreos = LIMITE_CORREOS_POR_RECALCULO;
 
     const [evaluacion] = await this.evaluar({ estudianteId });
 
@@ -657,9 +685,18 @@ export class RiesgoService {
   }
 
   /**
-   * Notifica al coordinador del programa por los dos canales del RF09: en
-   * plataforma y por correo. El correo se registra tambien como Notificacion
-   * para dejar constancia de que se despacho.
+   * Notifica una alerta nueva por los dos canales del RF09 —plataforma y
+   * correo— a las tres partes que pueden actuar sobre ella:
+   *
+   * - los docentes de los cursos del estudiante, que son quienes intervienen
+   *   sobre la nota y la entrega concretas;
+   * - la coordinacion del programa, que hace el seguimiento y responde por la
+   *   permanencia de la cohorte;
+   * - el propio estudiante, porque una alerta temprana que no llega a quien
+   *   debe reaccionar no es temprana, es solo un registro.
+   *
+   * El estudiante recibe un texto distinto: el mensaje interno habla de
+   * puntajes y umbrales, que a el no le dicen nada y solo suenan a sancion.
    */
   private async notificarAlerta(
     alertaId: string,
@@ -667,34 +704,97 @@ export class RiesgoService {
     coordinador: Coordinador | null,
     mensaje: string,
   ): Promise<void> {
-    if (!coordinador) return;
-
     const titulo = `Riesgo ${evaluacion.resultado.nivel.toLowerCase()}: ${evaluacion.nombre}`;
+    const docentes = await this.destinatarios.docentesDe(
+      evaluacion.estudianteId,
+    );
 
-    await this.prisma.notificacion.create({
-      data: {
-        usuarioId: coordinador.id,
-        alertaId,
-        titulo,
-        mensaje,
-        canal: 'PLATAFORMA',
+    const contexto =
+      `Programa: ${evaluacion.programaNombre}\n` +
+      `Código del estudiante: ${evaluacion.codigoEstudiante}\n` +
+      `Correo del estudiante: ${evaluacion.email}\n`;
+
+    for (const docente of docentes) {
+      await this.notificar(docente.usuarioId, alertaId, titulo, mensaje, {
+        para: docente.email,
+        asunto: `[Alerta académica] ${titulo}`,
+        cuerpo:
+          `${mensaje}\n\n` +
+          `${contexto}` +
+          `Cursos que usted dirige con este estudiante: ${docente.cursos.join(', ')}\n\n` +
+          `${this.enlacePanel(`/estudiante/${evaluacion.estudianteId}`)}\n\n` +
+          'El estudiante y la coordinación del programa recibieron este mismo aviso.',
+      });
+    }
+
+    if (coordinador) {
+      await this.notificar(coordinador.id, alertaId, titulo, mensaje, {
+        para: coordinador.email,
+        asunto: `[Alerta académica] ${titulo}`,
+        cuerpo:
+          `${mensaje}\n\n` +
+          `${contexto}\n` +
+          'Consulte el detalle y registre el seguimiento en el panel de alertas:\n' +
+          this.enlacePanel('/alertas'),
+      });
+    }
+
+    const avisoEstudiante = mensajeParaEstudiante(
+      evaluacion.nombre,
+      evaluacion.resultado,
+    );
+
+    await this.notificar(
+      evaluacion.usuarioId,
+      alertaId,
+      'Tu seguimiento académico necesita atención',
+      avisoEstudiante,
+      {
+        para: evaluacion.email,
+        asunto: '[Seguimiento académico] Revisemos juntos tus indicadores',
+        cuerpo:
+          `${avisoEstudiante}\n\n` +
+          'Consulta el detalle en tu panel:\n' +
+          this.enlacePanel('/mi-progreso'),
       },
+    );
+  }
+
+  /**
+   * Deja la notificacion en plataforma y, si el correo sale de verdad, una
+   * segunda constancia del canal CORREO. Registrar el correo como notificacion
+   * es lo que permite auditar despues que el aviso se despacho y no solo que se
+   * genero la alerta.
+   */
+  private async notificar(
+    usuarioId: string,
+    alertaId: string,
+    titulo: string,
+    mensaje: string,
+    correo: { para: string; asunto: string; cuerpo: string },
+  ): Promise<void> {
+    await this.prisma.notificacion.create({
+      data: { usuarioId, alertaId, titulo, mensaje, canal: 'PLATAFORMA' },
     });
 
-    const enviado = await this.correo.enviar({
-      para: coordinador.email,
-      asunto: `[Alerta académica] ${titulo}`,
-      cuerpo:
-        `${mensaje}\n\n` +
-        `Programa: ${evaluacion.programaNombre}\n` +
-        `Código del estudiante: ${evaluacion.codigoEstudiante}\n\n` +
-        'Consulte el detalle y registre el seguimiento en el panel de alertas.',
-    });
+    if (this.presupuestoCorreos <= 0) {
+      if (this.presupuestoCorreos === 0) {
+        this.presupuestoCorreos = -1; // avisa una sola vez por recalculo
+        this.logger.warn(
+          `Se alcanzó el tope de ${LIMITE_CORREOS_POR_RECALCULO} correos en este recálculo: ` +
+            'el resto de los avisos queda solo en plataforma',
+        );
+      }
+      return;
+    }
+    this.presupuestoCorreos--;
+
+    const enviado = await this.correo.enviar(correo);
 
     if (enviado) {
       await this.prisma.notificacion.create({
         data: {
-          usuarioId: coordinador.id,
+          usuarioId,
           alertaId,
           titulo,
           mensaje,
@@ -703,6 +803,14 @@ export class RiesgoService {
         },
       });
     }
+  }
+
+  /** Enlace absoluto a una pantalla del frontend, para incluirlo en el correo. */
+  private enlacePanel(ruta: string): string {
+    const base =
+      this.config.get<string>('APP_URL')?.replace(/\/$/, '') ??
+      'http://localhost:4200';
+    return `${base}${ruta}`;
   }
 
   private async coordinadoresPorPrograma(): Promise<

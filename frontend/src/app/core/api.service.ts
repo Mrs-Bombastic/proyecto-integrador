@@ -12,10 +12,13 @@ import type {
   UsuarioAdmin,
   DetalleEstudiante,
   EstudianteRiesgo,
+  MotivoDesercion,
   Notificacion,
   Programa,
   ResumenAlertas,
+  ResumenDesercion,
   ResumenRiesgo,
+  SolicitudDesercion,
   Umbral,
 } from './modelos';
 
@@ -177,6 +180,55 @@ export class ApiService {
   }): Promise<Observacion> {
     return firstValueFrom(
       this.http.post<Observacion>(`${this.base}/observaciones`, datos),
+    );
+  }
+
+  // ---------------------------- Deserción ---------------------------------
+
+  /** Radica el retiro del propio estudiante en sesion (RF14). */
+  radicarRetiro(datos: {
+    motivo: MotivoDesercion;
+    detalle: string;
+    confirmo: boolean;
+  }): Promise<SolicitudDesercion> {
+    return firstValueFrom(
+      this.http.post<SolicitudDesercion>(`${this.base}/desercion`, datos),
+    );
+  }
+
+  misRetiros(): Promise<SolicitudDesercion[]> {
+    return firstValueFrom(
+      this.http.get<SolicitudDesercion[]>(`${this.base}/desercion/mias`),
+    );
+  }
+
+  deserciones(
+    filtros: { estado?: string; motivo?: string; programaId?: string } = {},
+  ): Promise<SolicitudDesercion[]> {
+    return firstValueFrom(
+      this.http.get<SolicitudDesercion[]>(`${this.base}/desercion`, {
+        params: this.parametros(filtros),
+      }),
+    );
+  }
+
+  resumenDeserciones(programaId?: string): Promise<ResumenDesercion> {
+    return firstValueFrom(
+      this.http.get<ResumenDesercion>(`${this.base}/desercion/resumen`, {
+        params: this.parametros({ programaId }),
+      }),
+    );
+  }
+
+  resolverDesercion(
+    id: string,
+    datos: { estado: string; respuesta: string },
+  ): Promise<SolicitudDesercion> {
+    return firstValueFrom(
+      this.http.patch<SolicitudDesercion>(
+        `${this.base}/desercion/${id}`,
+        datos,
+      ),
     );
   }
 

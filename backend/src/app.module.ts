@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { JwtAuthGuard, RolesGuard } from './auth/guards.js';
 import { AlertasModule } from './alertas/alertas.module.js';
 import { CorreoModule } from './correo/correo.module.js';
+import { DesercionModule } from './desercion/desercion.module.js';
 import { EstudiantesModule } from './estudiantes/estudiantes.module.js';
 import { ObservacionesModule } from './observaciones/observaciones.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
@@ -23,6 +24,7 @@ import { UsuariosModule } from './usuarios/usuarios.module.js';
     RiesgoModule,
     AlertasModule,
     EstudiantesModule,
+    DesercionModule,
     ObservacionesModule,
     ReportesModule,
     UsuariosModule,

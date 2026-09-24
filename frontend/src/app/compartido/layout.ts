@@ -43,6 +43,12 @@ import type { Notificacion } from '../core/modelos';
                 class="rounded-md px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-100"
                 >Alertas</a
               >
+              <a
+                routerLink="/deserciones"
+                routerLinkActive="bg-indigo-50 text-indigo-700"
+                class="rounded-md px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-100"
+                >Retiros</a
+              >
             }
             @if (auth.tieneRol('ESTUDIANTE')) {
               <a
@@ -50,6 +56,12 @@ import type { Notificacion } from '../core/modelos';
                 routerLinkActive="bg-indigo-50 text-indigo-700"
                 class="rounded-md px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-100"
                 >Mi progreso</a
+              >
+              <a
+                routerLink="/retiro"
+                routerLinkActive="bg-indigo-50 text-indigo-700"
+                class="rounded-md px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-100"
+                >Retiro del programa</a
               >
             }
             @if (auth.tieneRol('ADMINISTRADOR')) {
@@ -69,76 +81,76 @@ import type { Notificacion } from '../core/modelos';
           </nav>
 
           <div class="flex items-center gap-3">
-            @if (auth.tieneRol('DOCENTE', 'COORDINADOR', 'ADMINISTRADOR')) {
-              <div class="relative">
-                <button
-                  type="button"
-                  class="relative rounded-md p-2 text-slate-500 hover:bg-slate-100"
-                  [attr.aria-label]="
-                    'Notificaciones, ' + noLeidas().length + ' sin leer'
-                  "
-                  (click)="alternarBuzon()"
+            <!-- El buzón es para todos los roles: desde el RF14 el estudiante
+                 también recibe avisos de su riesgo y de su retiro. -->
+            <div class="relative">
+              <button
+                type="button"
+                class="relative rounded-md p-2 text-slate-500 hover:bg-slate-100"
+                [attr.aria-label]="
+                  'Notificaciones, ' + noLeidas().length + ' sin leer'
+                "
+                (click)="alternarBuzon()"
+              >
+                <svg
+                  class="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  viewBox="0 0 24 24"
                 >
-                  <svg
-                    class="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    viewBox="0 0 24 24"
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-4-5.7V5a2 2 0 1 0-4 0v.3A6 6 0 0 0 6 11v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9"
+                  />
+                </svg>
+                @if (noLeidas().length > 0) {
+                  <span
+                    class="absolute -top-0.5 -right-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 0 0-4-5.7V5a2 2 0 1 0-4 0v.3A6 6 0 0 0 6 11v3.2a2 2 0 0 1-.6 1.4L4 17h5m6 0v1a3 3 0 1 1-6 0v-1m6 0H9"
-                    />
-                  </svg>
-                  @if (noLeidas().length > 0) {
-                    <span
-                      class="absolute -top-0.5 -right-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white"
-                    >
-                      {{ noLeidas().length > 9 ? '9+' : noLeidas().length }}
-                    </span>
-                  }
-                </button>
-
-                @if (buzonAbierto()) {
-                  <div
-                    class="absolute right-0 z-20 mt-2 w-80 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg"
-                  >
-                    <div
-                      class="border-b border-slate-100 px-4 py-2 text-xs font-semibold text-slate-500"
-                    >
-                      Notificaciones sin leer
-                    </div>
-                    @if (noLeidas().length === 0) {
-                      <p class="px-4 py-6 text-center text-sm text-slate-500">
-                        No hay notificaciones pendientes.
-                      </p>
-                    } @else {
-                      <ul class="max-h-80 divide-y divide-slate-100 overflow-y-auto">
-                        @for (n of noLeidas(); track n.id) {
-                          <li class="px-4 py-3">
-                            <p class="text-sm font-medium text-slate-800">
-                              {{ n.titulo }}
-                            </p>
-                            <p class="mt-0.5 text-xs text-slate-500">
-                              {{ n.mensaje }}
-                            </p>
-                            <button
-                              type="button"
-                              class="mt-1.5 text-xs font-medium text-indigo-600 hover:underline"
-                              (click)="marcarLeida(n)"
-                            >
-                              Marcar como leída
-                            </button>
-                          </li>
-                        }
-                      </ul>
-                    }
-                  </div>
+                    {{ noLeidas().length > 9 ? '9+' : noLeidas().length }}
+                  </span>
                 }
-              </div>
-            }
+              </button>
+
+              @if (buzonAbierto()) {
+                <div
+                  class="absolute right-0 z-20 mt-2 w-80 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg"
+                >
+                  <div
+                    class="border-b border-slate-100 px-4 py-2 text-xs font-semibold text-slate-500"
+                  >
+                    Notificaciones sin leer
+                  </div>
+                  @if (noLeidas().length === 0) {
+                    <p class="px-4 py-6 text-center text-sm text-slate-500">
+                      No hay notificaciones pendientes.
+                    </p>
+                  } @else {
+                    <ul class="max-h-80 divide-y divide-slate-100 overflow-y-auto">
+                      @for (n of noLeidas(); track n.id) {
+                        <li class="px-4 py-3">
+                          <p class="text-sm font-medium text-slate-800">
+                            {{ n.titulo }}
+                          </p>
+                          <p class="mt-0.5 text-xs text-slate-500">
+                            {{ n.mensaje }}
+                          </p>
+                          <button
+                            type="button"
+                            class="mt-1.5 text-xs font-medium text-indigo-600 hover:underline"
+                            (click)="marcarLeida(n)"
+                          >
+                            Marcar como leída
+                          </button>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+              }
+            </div>
 
             <div class="text-right">
               <p class="text-sm font-medium text-slate-800">
@@ -171,9 +183,7 @@ export class LayoutComponent {
   protected readonly buzonAbierto = signal(false);
 
   constructor() {
-    if (this.auth.tieneRol('DOCENTE', 'COORDINADOR', 'ADMINISTRADOR')) {
-      void this.cargarNotificaciones();
-    }
+    void this.cargarNotificaciones();
   }
 
   protected alternarBuzon(): void {

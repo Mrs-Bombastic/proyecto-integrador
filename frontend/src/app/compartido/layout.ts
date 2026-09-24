@@ -1,8 +1,17 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
 import type { Notificacion } from '../core/modelos';
+
+/** Cada cuanto se consultan notificaciones nuevas mientras la app esta abierta. */
+const INTERVALO_BUZON_MS = 60_000;
 
 /**
  * Marco de la aplicacion: barra superior con la identidad del usuario, la
@@ -229,6 +238,21 @@ export class LayoutComponent {
 
   constructor() {
     void this.cargarNotificaciones();
+
+    // El buzon se refresca solo: sin esto, un docente con la sesion abierta no
+    // se entera de una alerta o un retiro nuevo hasta recargar la pagina. Al
+    // volver a la pestana (o a la app instalada) se consulta de inmediato.
+    const refrescar = () => {
+      if (document.visibilityState === 'visible') {
+        void this.cargarNotificaciones();
+      }
+    };
+    const intervalo = setInterval(refrescar, INTERVALO_BUZON_MS);
+    document.addEventListener('visibilitychange', refrescar);
+    inject(DestroyRef).onDestroy(() => {
+      clearInterval(intervalo);
+      document.removeEventListener('visibilitychange', refrescar);
+    });
   }
 
   protected alternarMenu(): void {

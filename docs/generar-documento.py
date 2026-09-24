@@ -1002,10 +1002,10 @@ tabla(
          "Todo el sistema, usuarios y umbrales"],
         ["Coordinador", "coordinador.isd@dashboard.edu.co",
          "Los 50 estudiantes de Ingeniería de Software y Datos"],
-        ["Docente", "docente1@dashboard.edu.co",
+        ["Docente", "docente4@dashboard.edu.co",
          "Los estudiantes de sus dos cursos"],
         ["Estudiante", "est0001@estudiante.edu.co", "Un perfil de desempeño alto"],
-        ["Estudiante", "est0195@estudiante.edu.co", "Un perfil de riesgo alto"],
+        ["Estudiante", "est0189@estudiante.edu.co", "Un perfil de riesgo alto"],
     ],
     anchos=[2.8, 5.4, 7.2],
 )

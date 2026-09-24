@@ -401,9 +401,11 @@ async function main(): Promise<void> {
   console.log(`Contrasena para todos los usuarios de prueba: ${PASSWORD_DEMO}`);
   console.log('  Administrador: admin@dashboard.edu.co');
   console.log('  Coordinador:   coordinador.isd@dashboard.edu.co');
-  console.log('  Docente:       docente1@dashboard.edu.co');
+  // Docente, coordinador y el estudiante en riesgo son del mismo programa
+  // (ISD): lo que radica el estudiante llega al buzon de los otros dos.
+  console.log('  Docente:       docente4@dashboard.edu.co');
   console.log('  Estudiante:    est0001@estudiante.edu.co (perfil excelente)');
-  console.log('  Estudiante:    est0195@estudiante.edu.co (perfil riesgo alto)');
+  console.log('  Estudiante:    est0189@estudiante.edu.co (perfil riesgo alto)');
 }
 
 /**

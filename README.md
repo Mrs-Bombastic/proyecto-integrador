@@ -64,9 +64,9 @@ Contraseña para todos: `Dashboard2026*`
 |---|---|
 | Administrador | `admin@dashboard.edu.co` |
 | Coordinador | `coordinador.isd@dashboard.edu.co` |
-| Docente | `docente1@dashboard.edu.co` |
+| Docente | `docente4@dashboard.edu.co` |
 | Estudiante (desempeño alto) | `est0001@estudiante.edu.co` |
-| Estudiante (riesgo alto) | `est0195@estudiante.edu.co` |
+| Estudiante (riesgo alto) | `est0189@estudiante.edu.co` |
 
 Los datos semilla generan un periodo académico completo (2026-2) para 200
 estudiantes en 4 programas, con una distribución de desempeño que produce los

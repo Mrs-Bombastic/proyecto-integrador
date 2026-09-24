@@ -4,10 +4,18 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 
-/** Perfiles con acceso al sistema, con su usuario de prueba. */
+/**
+ * Perfiles con acceso al sistema, con su usuario de prueba.
+ *
+ * Los tres perfiles academicos estan relacionados entre si: EST0189 es de
+ * Ingenieria de Software y Datos (la coordina coordinador.isd) y cursa
+ * Proyecto Integrado I con docente4. Asi, lo que radica el estudiante (una
+ * solicitud de retiro, por ejemplo) aparece en el buzon del docente y del
+ * coordinador de prueba, no en el de usuarios ajenos a su programa.
+ */
 const PERFILES = [
-  { rol: 'Estudiante', email: 'est0195@estudiante.edu.co' },
-  { rol: 'Docente', email: 'docente1@dashboard.edu.co' },
+  { rol: 'Estudiante', email: 'est0189@estudiante.edu.co' },
+  { rol: 'Docente', email: 'docente4@dashboard.edu.co' },
   { rol: 'Coordinador', email: 'coordinador.isd@dashboard.edu.co' },
   { rol: 'Administrador', email: 'admin@dashboard.edu.co' },
 ];

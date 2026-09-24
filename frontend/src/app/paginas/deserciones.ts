@@ -109,7 +109,7 @@ const RESOLUCIONES = [
     }
 
     <div
-      class="mb-4 flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-white p-4"
+      class="mb-4 grid grid-cols-2 items-end gap-3 rounded-lg border border-slate-200 bg-white p-4 sm:flex sm:flex-wrap"
     >
       <div>
         <label for="estado" class="block text-xs font-medium text-slate-600">
@@ -117,7 +117,7 @@ const RESOLUCIONES = [
         </label>
         <select
           id="estado"
-          class="mt-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm sm:w-auto"
           [(ngModel)]="estado"
           (ngModelChange)="cargar()"
         >
@@ -134,7 +134,7 @@ const RESOLUCIONES = [
         </label>
         <select
           id="motivo"
-          class="mt-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm sm:w-auto"
           [(ngModel)]="motivoFiltro"
           (ngModelChange)="cargar()"
         >
@@ -254,7 +254,9 @@ const RESOLUCIONES = [
         aria-modal="true"
         aria-labelledby="titulo-retiro"
       >
-        <div class="w-full rounded-xl bg-white p-6 shadow-xl sm:w-[32rem]">
+        <div
+          class="max-h-full w-full overflow-y-auto rounded-xl bg-white p-5 shadow-xl sm:w-[32rem] sm:p-6"
+        >
           <h2 id="titulo-retiro" class="text-lg font-semibold text-slate-900">
             Atender solicitud de retiro
           </h2>

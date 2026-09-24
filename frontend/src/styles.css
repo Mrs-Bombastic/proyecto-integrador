@@ -35,3 +35,84 @@ body {
   background-color: oklch(0.98 0.005 260);
   color: oklch(0.25 0.02 260);
 }
+
+/* --------------------------------------------------------------------------
+   Ajustes para telefono (la app se instala como PWA).
+   Estas reglas van fuera de las capas de Tailwind a proposito: el CSS sin
+   capa gana a las utilidades, asi que pueden reordenar las tablas sin tener
+   que quitar las clases px-4/text-right que usan en escritorio.
+   -------------------------------------------------------------------------- */
+
+/* En modo instalado la app ocupa toda la pantalla: se respeta el notch y la
+   barra de gestos de iOS/Android. */
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 639px) {
+  /* iOS hace zoom al enfocar un campo con letra menor a 16px. */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Tabla que en pantallas angostas se convierte en una lista de tarjetas:
+   cada fila es un bloque y cada celda muestra su encabezado (data-label) a
+   la izquierda y el valor a la derecha. La primera celda hace de titulo. */
+@media (max-width: 767px) {
+  .tabla-movil thead {
+    display: none;
+  }
+
+  .tabla-movil,
+  .tabla-movil tbody,
+  .tabla-movil tr {
+    display: block;
+    width: 100%;
+  }
+
+  .tabla-movil tr {
+    padding: 0.875rem 1rem;
+  }
+
+  .tabla-movil td {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    column-gap: 0.5rem;
+    padding: 0.25rem 0;
+    text-align: right;
+  }
+
+  .tabla-movil td[data-label]::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    margin-right: auto;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: oklch(0.55 0.02 260);
+    text-align: left;
+  }
+
+  .tabla-movil td:first-child {
+    display: block;
+    padding-bottom: 0.5rem;
+    text-align: left;
+  }
+
+  .tabla-movil td:not([data-label]):not(:first-child) {
+    padding-top: 0.5rem;
+  }
+
+  .tabla-movil td[colspan] {
+    display: block;
+    padding: 2.5rem 0;
+    text-align: center;
+  }
+}

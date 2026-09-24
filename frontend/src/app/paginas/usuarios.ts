@@ -145,14 +145,14 @@ import type {
     </div>
 
     <!-- Listado -->
-    <div class="mb-4 flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-white p-4">
+    <div class="mb-4 grid grid-cols-2 items-end gap-3 rounded-lg border border-slate-200 bg-white p-4 sm:flex sm:flex-wrap">
       <div>
         <label for="filtroRol" class="block text-xs font-medium text-slate-600">
           Rol
         </label>
         <select
           id="filtroRol"
-          class="mt-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm sm:w-auto"
           [(ngModel)]="filtroRol"
           (ngModelChange)="cargarUsuarios()"
         >
@@ -168,7 +168,7 @@ import type {
         </label>
         <select
           id="filtroActivo"
-          class="mt-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm sm:w-auto"
           [(ngModel)]="filtroActivo"
           (ngModelChange)="cargarUsuarios()"
         >
@@ -177,7 +177,7 @@ import type {
           <option value="false">Inactivos</option>
         </select>
       </div>
-      <div class="min-w-56 flex-1">
+      <div class="col-span-2 sm:min-w-56 sm:flex-1">
         <label for="buscar" class="block text-xs font-medium text-slate-600">
           Buscar
         </label>
@@ -201,7 +201,7 @@ import type {
 
     <div class="overflow-hidden rounded-lg border border-slate-200 bg-white">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
+        <table class="tabla-movil w-full text-left text-sm">
           <thead class="bg-slate-50 text-xs text-slate-500 uppercase">
             <tr>
               <th scope="col" class="px-4 py-3 font-medium">Usuario</th>
@@ -241,15 +241,17 @@ import type {
                       }
                     </p>
                   </td>
-                  <td class="px-4 py-3 text-slate-600">{{ u.rol.nombre }}</td>
-                  <td class="px-4 py-3 text-slate-600">
+                  <td data-label="Rol" class="px-4 py-3 text-slate-600">
+                    {{ u.rol.nombre }}
+                  </td>
+                  <td data-label="Último acceso" class="px-4 py-3 text-slate-600">
                     {{
                       u.ultimoAcceso
                         ? (u.ultimoAcceso | date: 'dd/MM/yyyy HH:mm')
                         : 'Nunca'
                     }}
                   </td>
-                  <td class="px-4 py-3">
+                  <td data-label="Estado" class="px-4 py-3">
                     <span
                       class="rounded-full px-2.5 py-1 text-xs font-medium"
                       [class]="

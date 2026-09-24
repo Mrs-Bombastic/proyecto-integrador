@@ -89,7 +89,7 @@ import type {
     }
 
     <div
-      class="mb-4 flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-white p-4"
+      class="mb-4 grid grid-cols-2 items-end gap-3 rounded-lg border border-slate-200 bg-white p-4 sm:flex sm:flex-wrap"
     >
       @if (programas().length > 1) {
         <div>
@@ -98,7 +98,7 @@ import type {
           </label>
           <select
             id="programa"
-            class="mt-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm sm:w-auto"
             [(ngModel)]="programaId"
             (ngModelChange)="cambiarPrograma()"
           >
@@ -116,7 +116,7 @@ import type {
         </label>
         <select
           id="curso"
-          class="mt-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm sm:w-auto"
           [(ngModel)]="cursoId"
           (ngModelChange)="cargar()"
         >
@@ -133,7 +133,7 @@ import type {
         </label>
         <select
           id="cohorte"
-          class="mt-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm sm:w-auto"
           [(ngModel)]="cohorte"
           (ngModelChange)="cargar()"
         >
@@ -152,7 +152,7 @@ import type {
         </label>
         <select
           id="periodo"
-          class="mt-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm sm:w-auto"
           [(ngModel)]="periodo"
           (ngModelChange)="cargar()"
         >
@@ -169,7 +169,7 @@ import type {
         </label>
         <select
           id="nivel"
-          class="mt-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm"
+          class="mt-1 w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm sm:w-auto"
           [(ngModel)]="nivelRiesgo"
           (ngModelChange)="cargar()"
         >
@@ -180,7 +180,7 @@ import type {
         </select>
       </div>
 
-      <div class="flex-1 min-w-48">
+      <div class="col-span-2 sm:min-w-48 sm:flex-1">
         <label for="busqueda" class="block text-xs font-medium text-slate-600">
           Buscar
         </label>
@@ -205,7 +205,7 @@ import type {
       @if (hayFiltros()) {
         <button
           type="button"
-          class="text-sm font-medium text-slate-500 hover:underline"
+          class="py-1.5 text-sm font-medium text-slate-500 hover:underline"
           (click)="limpiar()"
         >
           Limpiar
@@ -215,7 +215,9 @@ import type {
 
     <div class="overflow-hidden rounded-lg border border-slate-200 bg-white">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
+        <!-- tabla-movil (styles.css): en el telefono cada fila pasa a ser
+             una tarjeta con la etiqueta de cada dato. -->
+        <table class="tabla-movil w-full text-left text-sm">
           <thead class="bg-slate-50 text-xs text-slate-500 uppercase">
             <tr>
               <th scope="col" class="px-4 py-3 font-medium">Estudiante</th>
@@ -259,40 +261,47 @@ import type {
                       {{ e.codigoEstudiante }}
                     </p>
                   </td>
-                  <td class="px-4 py-3 text-slate-600">
+                  <td data-label="Programa" class="px-4 py-3 text-slate-600">
                     {{ e.programaNombre }}
                   </td>
-                  <td class="px-4 py-3 whitespace-nowrap text-slate-600">
+                  <td
+                    data-label="Cohorte"
+                    class="px-4 py-3 whitespace-nowrap text-slate-600"
+                  >
                     {{ e.cohorte }}
                     <span class="text-xs text-slate-400"
                       >· sem. {{ e.semestre }}</span
                     >
                   </td>
                   <td
+                    data-label="Promedio"
                     class="px-4 py-3 text-right tabular-nums"
                     [class]="colorValor(e, 'PROMEDIO')"
                   >
                     {{ e.valores.PROMEDIO.toFixed(2) }}
                   </td>
                   <td
+                    data-label="Asistencia"
                     class="px-4 py-3 text-right tabular-nums"
                     [class]="colorValor(e, 'ASISTENCIA')"
                   >
                     {{ e.valores.ASISTENCIA.toFixed(0) }}%
                   </td>
                   <td
+                    data-label="Participación"
                     class="px-4 py-3 text-right tabular-nums"
                     [class]="colorValor(e, 'PARTICIPACION')"
                   >
                     {{ e.valores.PARTICIPACION.toFixed(1) }}
                   </td>
                   <td
+                    data-label="Vencidas"
                     class="px-4 py-3 text-right tabular-nums"
                     [class]="colorValor(e, 'ENTREGAS')"
                   >
                     {{ e.valores.ENTREGAS }}
                   </td>
-                  <td class="px-4 py-3">
+                  <td data-label="Estado" class="px-4 py-3">
                     <app-semaforo [nivel]="e.resultado.nivel" />
                     @if (e.alertasAbiertas > 0) {
                       <span class="ml-1 text-xs text-slate-500">

@@ -15,8 +15,12 @@ import type { Notificacion } from '../core/modelos';
   template: `
     <div class="min-h-screen bg-slate-50">
       <header class="border-b border-slate-200 bg-white">
-        <div class="flex flex-wrap items-center gap-4 px-6 py-3">
-          <a routerLink="/" class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 sm:px-6">
+          <a
+            routerLink="/"
+            class="flex items-center gap-2"
+            (click)="menuAbierto.set(false)"
+          >
             <span
               class="grid h-8 w-8 place-items-center rounded-lg bg-indigo-600 text-sm font-bold text-white"
               >SA</span
@@ -29,24 +33,32 @@ import type { Notificacion } from '../core/modelos';
             </span>
           </a>
 
-          <nav class="flex flex-1 flex-wrap items-center gap-1 text-sm">
+          <!-- En el telefono la navegacion se pliega bajo el boton de menu y
+               ocupa su propia fila; desde md vuelve a estar en linea. -->
+          <nav
+            id="navegacion"
+            class="order-last w-full flex-col gap-1 border-t border-slate-100 pt-2 text-sm md:order-none md:flex md:w-auto md:flex-1 md:flex-row md:flex-wrap md:items-center md:border-0 md:pt-0"
+            [class.flex]="menuAbierto()"
+            [class.hidden]="!menuAbierto()"
+            (click)="menuAbierto.set(false)"
+          >
             @if (auth.tieneRol('DOCENTE', 'COORDINADOR', 'ADMINISTRADOR')) {
               <a
                 routerLink="/panel"
                 routerLinkActive="bg-indigo-50 text-indigo-700"
-                class="rounded-md px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-100"
+                class="rounded-md px-3 py-2 font-medium text-slate-600 hover:bg-slate-100 md:py-1.5"
                 >Estudiantes</a
               >
               <a
                 routerLink="/alertas"
                 routerLinkActive="bg-indigo-50 text-indigo-700"
-                class="rounded-md px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-100"
+                class="rounded-md px-3 py-2 font-medium text-slate-600 hover:bg-slate-100 md:py-1.5"
                 >Alertas</a
               >
               <a
                 routerLink="/deserciones"
                 routerLinkActive="bg-indigo-50 text-indigo-700"
-                class="rounded-md px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-100"
+                class="rounded-md px-3 py-2 font-medium text-slate-600 hover:bg-slate-100 md:py-1.5"
                 >Retiros</a
               >
             }
@@ -54,13 +66,13 @@ import type { Notificacion } from '../core/modelos';
               <a
                 routerLink="/mi-progreso"
                 routerLinkActive="bg-indigo-50 text-indigo-700"
-                class="rounded-md px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-100"
+                class="rounded-md px-3 py-2 font-medium text-slate-600 hover:bg-slate-100 md:py-1.5"
                 >Mi progreso</a
               >
               <a
                 routerLink="/retiro"
                 routerLinkActive="bg-indigo-50 text-indigo-700"
-                class="rounded-md px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-100"
+                class="rounded-md px-3 py-2 font-medium text-slate-600 hover:bg-slate-100 md:py-1.5"
                 >Retiro del programa</a
               >
             }
@@ -68,19 +80,19 @@ import type { Notificacion } from '../core/modelos';
               <a
                 routerLink="/usuarios"
                 routerLinkActive="bg-indigo-50 text-indigo-700"
-                class="rounded-md px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-100"
+                class="rounded-md px-3 py-2 font-medium text-slate-600 hover:bg-slate-100 md:py-1.5"
                 >Usuarios</a
               >
               <a
                 routerLink="/umbrales"
                 routerLinkActive="bg-indigo-50 text-indigo-700"
-                class="rounded-md px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-100"
+                class="rounded-md px-3 py-2 font-medium text-slate-600 hover:bg-slate-100 md:py-1.5"
                 >Umbrales</a
               >
             }
           </nav>
 
-          <div class="flex items-center gap-3">
+          <div class="ml-auto flex items-center gap-2 sm:gap-3">
             <!-- El buzón es para todos los roles: desde el RF14 el estudiante
                  también recibe avisos de su riesgo y de su retiro. -->
             <div class="relative">
@@ -116,7 +128,7 @@ import type { Notificacion } from '../core/modelos';
 
               @if (buzonAbierto()) {
                 <div
-                  class="absolute right-0 z-20 mt-2 w-80 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg"
+                  class="fixed inset-x-4 top-16 z-20 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg sm:absolute sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-80"
                 >
                   <div
                     class="border-b border-slate-100 px-4 py-2 text-xs font-semibold text-slate-500"
@@ -152,7 +164,7 @@ import type { Notificacion } from '../core/modelos';
               }
             </div>
 
-            <div class="text-right">
+            <div class="hidden text-right sm:block">
               <p class="text-sm font-medium text-slate-800">
                 {{ auth.nombreCompleto() }}
               </p>
@@ -165,11 +177,43 @@ import type { Notificacion } from '../core/modelos';
             >
               Salir
             </button>
+            <button
+              type="button"
+              class="rounded-md p-2 text-slate-600 hover:bg-slate-100 md:hidden"
+              aria-controls="navegacion"
+              [attr.aria-expanded]="menuAbierto()"
+              [attr.aria-label]="menuAbierto() ? 'Cerrar menú' : 'Abrir menú'"
+              (click)="alternarMenu()"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                viewBox="0 0 24 24"
+              >
+                @if (menuAbierto()) {
+                  <path stroke-linecap="round" d="M6 6l12 12M18 6 6 18" />
+                } @else {
+                  <path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16" />
+                }
+              </svg>
+            </button>
           </div>
         </div>
       </header>
 
-      <main class="px-6 py-6">
+      <!-- En el telefono el nombre y el rol no caben en la barra; se muestran
+           al desplegar el menu. -->
+      @if (menuAbierto()) {
+        <p
+          class="border-b border-slate-200 bg-white px-4 py-2 text-xs text-slate-500 sm:hidden"
+        >
+          {{ auth.nombreCompleto() }} · {{ auth.rol() }}
+        </p>
+      }
+
+      <main class="px-4 py-5 sm:px-6 sm:py-6">
         <router-outlet />
       </main>
     </div>
@@ -181,12 +225,19 @@ export class LayoutComponent {
 
   protected readonly noLeidas = signal<Notificacion[]>([]);
   protected readonly buzonAbierto = signal(false);
+  protected readonly menuAbierto = signal(false);
 
   constructor() {
     void this.cargarNotificaciones();
   }
 
+  protected alternarMenu(): void {
+    this.menuAbierto.update((abierto) => !abierto);
+    this.buzonAbierto.set(false);
+  }
+
   protected alternarBuzon(): void {
+    this.menuAbierto.set(false);
     this.buzonAbierto.update((abierto) => !abierto);
     if (this.buzonAbierto()) void this.cargarNotificaciones();
   }

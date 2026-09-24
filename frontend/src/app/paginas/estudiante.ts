@@ -85,7 +85,7 @@ const COLOR_SEMAFORO: Record<string, string> = {
             {{ d.codigoEstudiante }} · {{ d.programaNombre }}
           </p>
         </div>
-        <div class="text-right">
+        <div class="sm:text-right">
           <app-semaforo [nivel]="d.resultado.nivel" />
           <p class="mt-1.5 text-xs text-slate-500">
             Puntaje de riesgo: {{ d.resultado.puntaje }} / 100
@@ -106,7 +106,7 @@ const COLOR_SEMAFORO: Record<string, string> = {
         </div>
       </div>
 
-      <div class="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         @for (ind of d.resultado.detalle; track ind.indicador) {
           <div class="rounded-lg border border-slate-200 bg-white p-4">
             <div class="flex items-start justify-between gap-2">
@@ -199,7 +199,7 @@ const COLOR_SEMAFORO: Record<string, string> = {
           </p>
         } @else {
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
+            <table class="tabla-movil w-full text-left text-sm">
               <thead class="bg-slate-50 text-xs text-slate-500 uppercase">
                 <tr>
                   <th scope="col" class="px-5 py-2.5 font-medium">Curso</th>
@@ -236,23 +236,33 @@ const COLOR_SEMAFORO: Record<string, string> = {
                       </p>
                     </td>
                     @for (corte of cortes; track corte) {
-                      <td class="px-3 py-3 text-right tabular-nums">
+                      <td
+                        [attr.data-label]="'Corte ' + corte"
+                        class="px-3 py-3 text-right tabular-nums"
+                      >
                         {{ notaDeCorte(c, corte) }}
                       </td>
                     }
                     <td
+                      data-label="Promedio"
                       class="px-3 py-3 text-right font-semibold tabular-nums"
                       [class]="colorNota(c.promedio)"
                     >
                       {{ c.promedio.toFixed(2) }}
                     </td>
-                    <td class="px-3 py-3 text-right tabular-nums text-slate-700">
+                    <td
+                      data-label="Asistencia"
+                      class="px-3 py-3 text-right tabular-nums text-slate-700"
+                    >
                       {{ c.asistencia.porcentaje }}%
                       <span class="block text-xs text-slate-400">
                         {{ c.asistencia.ausentes }} ausencia(s)
                       </span>
                     </td>
-                    <td class="px-3 py-3 text-right tabular-nums text-slate-700">
+                    <td
+                      data-label="Vencidas"
+                      class="px-3 py-3 text-right tabular-nums text-slate-700"
+                    >
                       {{ c.entregas.vencidas }}/{{ c.entregas.total }}
                     </td>
                   </tr>

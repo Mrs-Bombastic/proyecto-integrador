@@ -28,7 +28,7 @@ const PERFILES = [
     <div class="grid min-h-screen lg:grid-cols-2">
       <!-- Panel institucional -->
       <div
-        class="bg-marca flex flex-col justify-between gap-10 px-6 py-8 text-white sm:px-10 lg:gap-0 lg:px-16 lg:py-16"
+        class="bg-marca flex flex-col justify-between gap-6 px-6 py-6 text-white sm:gap-10 sm:px-10 sm:py-8 lg:gap-0 lg:px-16 lg:py-16"
       >
         <div class="flex items-center gap-3">
           <span
@@ -43,16 +43,18 @@ const PERFILES = [
 
         <div>
           <h1
-            class="text-3xl leading-tight font-semibold tracking-tight text-pretty lg:text-[2.75rem]"
+            class="text-2xl leading-tight font-semibold tracking-tight text-pretty sm:text-3xl lg:text-[2.75rem]"
           >
             Seguimiento académico<br />y alertas tempranas
           </h1>
-          <p class="mt-5 text-base leading-relaxed text-white/80">
+          <!-- En el telefono solo queda el titulo: el formulario debe verse
+               sin desplazarse. -->
+          <p class="mt-5 hidden text-base leading-relaxed text-white/80 sm:block">
             Calificaciones, asistencia y participación en un solo lugar, con
             detección temprana de los estudiantes que necesitan acompañamiento.
           </p>
 
-          <ul class="mt-10 flex flex-col gap-4 lg:mt-12">
+          <ul class="mt-10 hidden flex-col gap-4 sm:flex lg:mt-12">
             <li class="flex items-baseline gap-3.5">
               <span
                 class="bg-riesgo-normal h-2.5 w-2.5 shrink-0 rounded-full"
@@ -90,7 +92,7 @@ const PERFILES = [
           </ul>
         </div>
 
-        <p class="text-[0.8125rem] text-white/60">
+        <p class="hidden text-[0.8125rem] text-white/60 sm:block">
           Proyecto Integrado I · Facultad de Ingeniería
         </p>
       </div>
@@ -98,7 +100,7 @@ const PERFILES = [
       <!-- Formulario. El bloque lleva una medida propia en pantallas grandes:
            estirado a media pantalla los campos quedan larguísimos y cuesta
            recorrerlos. Es un ancho, no un tope. -->
-      <div class="flex flex-col items-center justify-center bg-white px-6 py-12 sm:px-10 lg:py-16">
+      <div class="flex flex-col items-center justify-start bg-white px-6 py-8 sm:justify-center sm:px-10 sm:py-12 lg:py-16">
         <div class="w-full lg:w-[30rem]">
         <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
           Iniciar sesión
